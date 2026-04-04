@@ -1,0 +1,17 @@
+name: Sell
+api: 2.0.0
+main: SellHand\Main
+version: 2.0
+author: Muqsit
+commands:
+  sell:
+    description: Bán Các Vật Phẩm Trong Túi Đồ Hoặc Trên Tay Của Bạn
+permission:
+  sell:
+    default: true
+    children:
+      sell.hand:
+        default: true
+      sell.all:
+        default: true
+#Ghast Noob

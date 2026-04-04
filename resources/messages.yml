@@ -1,0 +1,12 @@
+---
+#Tin Nhắn Khi Người Chơi Không Có Quyền Sử Dụng Lệnh /sell
+error-permission: "§b⚒§cBạn Không Có Quyền Sử Dụng Lệnh §e/sell§b⚒"
+
+
+#Tin Nhắn Khi Người Chơi Không Có Quyền Sử Dụng Lệnh /sell hand
+error-nopermission-sellHand: "§b⚒§cBạn Không Có Quyền Sử Dụng Lệnh §e/sell hand§b⚒"
+
+
+#Tin Nhắn Khi Người Chơi Không Có Quyền Sử Dụng Lệnh /sell all
+error-nopermission-sellAll: "§b⚒§cBạn Không Có Quyền Sử Dụng Lệnh §e/sell all§b⚒"
+...
