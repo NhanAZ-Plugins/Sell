@@ -1,0 +1,168 @@
+name: Analyze and build Sell for Axolotl-PM API 5
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-checks:
+    name: Check source contracts and workflow syntax
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out Sell source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up PHP 8.4
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
+        with:
+          php-version: '8.4'
+          pm-version-major: '5'
+      - name: Check PHP syntax
+        run: find src tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Test sell policy and legacy price mapping
+        run: php tests/sell-contract.php
+      - name: Check GitHub Actions syntax with pinned actionlint
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --location --silent --show-error \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.11/actionlint_1.7.11_linux_amd64.tar.gz \
+            --output "$archive"
+          printf '%s  %s\n' \
+            900919a84f2229bac68ca9cd4103ea297abc35e9689ebb842c6e34a3d1b01b0a "$archive" | sha256sum --check --status
+          tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" .github/workflows/build.yml
+
+  build:
+    name: Analyze and build against API ${{ matrix.label }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: 5.0.0
+            ref: b16cc69974d4e805d21e6328ab77c0e17cd7116d
+          - label: 5.49.2
+            ref: 7f229d2ee5f8972092c376f1eca26275477797dd
+    steps:
+      - name: Check out Sell source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Axolotl-PM PHP 8.4
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
+        with:
+          php-version: '8.4'
+          pm-version-major: '5'
+      - name: Check out pinned Axolotl-PM API source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: axolotl-pm/PocketMine-MP
+          ref: ${{ matrix.ref }}
+          path: .devtools-dependencies/axolotl-pm
+          persist-credentials: false
+      - name: Check out pinned EconomyAPI source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ACM-PocketMine-MP/EconomyAPI
+          ref: d96e269de09da7494690b7fa459b5168880fc671
+          path: .devtools-dependencies/economyapi
+          persist-credentials: false
+      - name: Check out pinned DevTools builder
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: NhanAZ/DevTools
+          ref: 8d13a75aaf4f330fdbd93737d58be9cacc41e262
+          path: .devtools-dependencies/devtools
+          persist-credentials: false
+      - name: Build the plugin and run PHPStan at maximum level
+        id: build
+        uses: ./.devtools-dependencies/devtools
+        with:
+          phpstan: max
+          phpstan-server: .devtools-dependencies/axolotl-pm
+          phpstan-paths: .devtools-dependencies/economyapi/src
+      - name: Write the validated PHAR checksum
+        shell: bash
+        env:
+          BUILT_PHAR: ${{ steps.build.outputs.phar }}
+        run: (cd "$(dirname "$BUILT_PHAR")" && sha256sum "$(basename "$BUILT_PHAR")" > "$(basename "$BUILT_PHAR").sha256")
+      - name: Upload validated Sell PHAR
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Sell-api-${{ matrix.label }}-${{ github.sha }}
+          path: |
+            ${{ steps.build.outputs.phar }}
+            ${{ steps.build.outputs.phar }}.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+  runtime-smoke:
+    name: Start the built Sell PHAR on Axolotl-PM 5.49.2
+    needs: [source-checks, build]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out Sell source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Axolotl-PM PHP 8.4
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
+        with:
+          php-version: '8.4'
+          pm-version-major: '5'
+      - name: Download the PHAR built by this commit
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: Sell-api-5.49.2-${{ github.sha }}
+          path: ${{ runner.temp }}/sell-artifact
+      - name: Check out the pinned EconomyAPI runtime dependency
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ACM-PocketMine-MP/EconomyAPI
+          ref: d96e269de09da7494690b7fa459b5168880fc671
+          path: .devtools-dependencies/economyapi
+          persist-credentials: false
+      - name: Download and verify the pinned Axolotl-PM runtime
+        shell: bash
+        env:
+          SERVER_SHA256: 3b891fc2d2954b8899e79321f028de3b78ab1e740075c5c83b5f726adb4dbc6c
+        run: |
+          set -euo pipefail
+          runtime="$RUNNER_TEMP/sell-runtime"
+          mkdir -p "$runtime/data/plugins"
+          curl --fail --location --silent --show-error \
+            https://github.com/axolotl-pm/PocketMine-MP/releases/download/5.49.2/PocketMine-MP.phar \
+            --output "$runtime/PocketMine-MP.phar"
+          printf '%s  %s\n' "$SERVER_SHA256" "$runtime/PocketMine-MP.phar" | sha256sum --check --status
+          (cd "$RUNNER_TEMP/sell-artifact" && sha256sum --check Sell.phar.sha256)
+          php -d phar.readonly=0 tests/package-economyapi-runtime.php \
+            .devtools-dependencies/economyapi "$runtime/data/plugins/EconomyAPI.phar"
+          cp "$RUNNER_TEMP/sell-artifact/Sell.phar" "$runtime/data/plugins/Sell.phar"
+          php "$runtime/PocketMine-MP.phar" --no-wizard --disable-ansi \
+            --data="$runtime/data" --plugins="$runtime/data/plugins" > "$runtime/server.log" 2>&1 &
+          server_pid=$!
+          ready=0
+          for _ in $(seq 1 90); do
+            if grep -Fq 'Enabling EconomyAPI v6.0.0-PM5' "$runtime/server.log" && grep -Fq 'Enabling Sell v2.1.0' "$runtime/server.log"; then ready=1; fi
+            if grep -Fq 'Done (' "$runtime/server.log"; then break; fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then cat "$runtime/server.log"; exit 1; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ] || ! grep -Fq 'Done (' "$runtime/server.log"; then
+            cat "$runtime/server.log"
+            kill -INT "$server_pid" 2>/dev/null || true
+            wait "$server_pid" || true
+            exit 1
+          fi
+          kill -INT "$server_pid"
+          for _ in $(seq 1 30); do
+            if ! kill -0 "$server_pid" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          if kill -0 "$server_pid" 2>/dev/null; then kill "$server_pid"; cat "$runtime/server.log"; exit 1; fi
+          wait "$server_pid"
+          if grep -E '\[(ERROR|CRITICAL)\]' "$runtime/server.log"; then exit 1; fi
+          cat "$runtime/server.log"

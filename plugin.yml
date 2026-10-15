@@ -1,17 +1,23 @@
 name: Sell
-api: 2.0.0
+api: 5.0.0
 main: SellHand\Main
-version: 2.0
-author: Muqsit
+version: 2.1.0
+author: [Muqsit, Ghast Noob]
+depend: [EconomyAPI]
 commands:
   sell:
-    description: Bán Các Vật Phẩm Trong Túi Đồ Hoặc Trên Tay Của Bạn
-permission:
+    description: Sell configured inventory items to EconomyAPI
+    usage: /sell <hand|all|about>
+    permission: sell
+
+permissions:
   sell:
+    description: Allows access to the sell command
     default: true
-    children:
-      sell.hand:
-        default: true
-      sell.all:
-        default: true
+  sell.hand:
+    description: Allows selling the held item
+    default: true
+  sell.all:
+    description: Allows selling all configured items in the inventory
+    default: true
 #Ghast Noob
