@@ -76,7 +76,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: NhanAZ/DevTools
-          ref: 8d13a75aaf4f330fdbd93737d58be9cacc41e262
+          ref: 565bc76b54edc15028ba0c9d545a7e60a81f9414
           path: .devtools-dependencies/devtools
           persist-credentials: false
       - name: Build the plugin and run PHPStan at maximum level
@@ -99,8 +99,6 @@ jobs:
             ${{ steps.build.outputs.phar }}
             ${{ steps.build.outputs.phar }}.sha256
           if-no-files-found: error
-          retention-days: 14
-
   runtime-smoke:
     name: Start the built Sell PHAR on Axolotl-PM 5.49.2
     needs: [source-checks, build]
