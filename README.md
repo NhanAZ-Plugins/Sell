@@ -1,6 +1,15 @@
 # Sell
 
-Sell lets players sell the item in their hand or configured items in their inventory through [EconomyAPI](https://github.com/ACM-PocketMine-MP/EconomyAPI). It preserves the legacy numeric item IDs and metadata in `resources/sell.yml`, then maps them to the current item types when the plugin starts.
+Axolotl-PM API 5 plugin for selling configured inventory items through EconomyAPI.
+
+[![CI](https://github.com/NhanAZ-Plugins/Sell/actions/workflows/build.yml/badge.svg)](https://github.com/NhanAZ-Plugins/Sell/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/NhanAZ-Plugins/Sell)](https://github.com/NhanAZ-Plugins/Sell/releases/latest)
+[![License](https://img.shields.io/github/license/NhanAZ-Plugins/Sell)](https://github.com/NhanAZ-Plugins/Sell/blob/main/LICENSE)
+[![Discord](https://img.shields.io/discord/986553214889517088?label=Discord&logo=discord&logoColor=white&color=5865F2)](https://discord.gg/j2X83ujT6c)
+
+## Overview
+
+This plugin targets the PocketMine-MP and Axolotl-PM API 5 ecosystem and is maintained under [NhanAZ-Plugins](https://github.com/NhanAZ-Plugins).
 
 ## Requirements
 
