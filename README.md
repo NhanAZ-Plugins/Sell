@@ -34,3 +34,8 @@ The CI runtime smoke test checks plugin loading and clean shutdown without a con
 ## Build and license
 
 The [build workflow](.github/workflows/build.yml) uses [DevTools](https://github.com/NhanAZ/DevTools) to run PHPStan at maximum level, build the plugin PHAR and verify the artifact. This port is based on [Muqsit/Sell](https://github.com/Muqsit/Sell); its GPL-3.0 license and original author credits are retained in [LICENSE](LICENSE).
+
+
+## Credits
+
+Authors: NhanAZ, Muqsit.
