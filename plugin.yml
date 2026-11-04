@@ -2,7 +2,7 @@ name: Sell
 api: 5.0.0
 main: SellHand\Main
 version: 2.1.0
-author: [Muqsit, Ghast Noob]
+authors: ["NhanAZ", "Muqsit"]
 depend: [EconomyAPI]
 commands:
   sell:
