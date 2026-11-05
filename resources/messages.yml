@@ -1,12 +1,12 @@
 ---
-#Tin Nhắn Khi Người Chơi Không Có Quyền Sử Dụng Lệnh /sell
-error-permission: "§b⚒§cBạn Không Có Quyền Sử Dụng Lệnh §e/sell§b⚒"
+# Messages used when the sender lacks permission for /sell.
+error-permission: "§cYou do not have permission to use /sell."
 
 
-#Tin Nhắn Khi Người Chơi Không Có Quyền Sử Dụng Lệnh /sell hand
-error-nopermission-sellHand: "§b⚒§cBạn Không Có Quyền Sử Dụng Lệnh §e/sell hand§b⚒"
+# Message used when the sender lacks permission for /sell hand.
+error-nopermission-sellHand: "§cYou do not have permission to use /sell hand."
 
 
-#Tin Nhắn Khi Người Chơi Không Có Quyền Sử Dụng Lệnh /sell all
-error-nopermission-sellAll: "§b⚒§cBạn Không Có Quyền Sử Dụng Lệnh §e/sell all§b⚒"
+# Message used when the sender lacks permission for /sell all.
+error-nopermission-sellAll: "§cYou do not have permission to use /sell all."
 ...

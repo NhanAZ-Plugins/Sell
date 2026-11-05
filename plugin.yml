@@ -20,4 +20,3 @@ permissions:
   sell.all:
     description: Allows selling all configured items in the inventory
     default: true
-#Ghast Noob

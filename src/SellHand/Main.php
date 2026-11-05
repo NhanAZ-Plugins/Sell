@@ -44,13 +44,13 @@ final class Main extends PluginBase{
 			return true;
 		}
 		if(!$sender->isSurvival()){
-			$sender->sendMessage("§b⚒§eVui Lòng Chỉnh Về Chế Độ Sinh Tồn Để Sử Dụng Lệnh§b⚒");
+			$sender->sendMessage("§cYou must be in survival mode to use this command.");
 			return true;
 		}
 
 		$subcommand = strtolower($args[0] ?? "");
 		if($subcommand === "about"){
-			$sender->sendMessage("§b⚒§aThông Tin Plugin§b⚒\n§f•§eTác Giả:§a Muqsit Rayyan\n§f•§eChỉnh Sửa:§a Ghast Noob\n§f•§ePhiên Bản:§a " . $this->getDescription()->getVersion());
+			$sender->sendMessage("[Sell]\nAuthors: NhanAZ, Muqsit\nVersion: " . $this->getDescription()->getVersion());
 			return true;
 		}
 
@@ -61,12 +61,12 @@ final class Main extends PluginBase{
 			}
 			$item = $sender->getInventory()->getItemInHand();
 			if($item->isNull()){
-				$sender->sendMessage("§b⚒§eBạn Không Có Bất Kỳ Vật Phẩm Nào Để Bán§b⚒");
+				$sender->sendMessage("§eYou are not holding an item to sell.");
 				return true;
 			}
 			$price = $this->prices->getPrice($item->getTypeId(), $item->getStateId());
 			if($price === null || $price <= 0){
-				$sender->sendMessage("§b⚒§eKhông Thể Bán Vật Phẩm Này§b⚒");
+				$sender->sendMessage("§eThis item cannot be sold.");
 				return true;
 			}
 			$this->sellItems($sender, [$item]);
@@ -82,7 +82,7 @@ final class Main extends PluginBase{
 			return true;
 		}
 
-		$sender->sendMessage("§b⚒§aHướng Dẫn Sử Dụng Plugin§b⚒\n§f•§e /sell all §f-§a Để Bán Tất Cả Vật Phẩm Có Trong Túi Đồ\n§f•§e /sell hand §f-§a Bán Vật Phẩm Trên Tay Bạn Đang Cầm\n§f•§e /sell about §f-§a Xem Thông Tin Plugin");
+		$sender->sendMessage("[Sell] Commands:\n/sell all - Sell all configured inventory items\n/sell hand - Sell the item in your hand\n/sell about - Show plugin information");
 		return true;
 	}
 
@@ -141,7 +141,7 @@ final class Main extends PluginBase{
 		}
 
 		if($plan === [] || $totalCents < 1){
-			$player->sendMessage("§b⚒§eKhông Có Vật Phẩm Nào Có Thể Bán§b⚒");
+			$player->sendMessage("§eNo configured items can be sold.");
 			return;
 		}
 
@@ -236,9 +236,9 @@ final class Main extends PluginBase{
 	private function sendSaleReceipt(Player $player, array $plan, int $totalCents) : void{
 		foreach($plan as $entry){
 			$item = $entry["item"];
-			$player->sendMessage("§b⚒§aBạn Đã Nhận Được §e" . SellPolicy::formatCents($entry["total_cents"]) . "§e Xu§a Từ Việc Bán §e" . $item->getCount() . " " . $item->getName() . "§a Với Giá Cấu Hình §e" . $this->formatConfiguredPrice($entry["unit_price"]) . "§e Xu§a Mỗi Vật Phẩm§b⚒");
+			$player->sendMessage("§aSold " . $item->getCount() . " " . $item->getName() . " for " . SellPolicy::formatCents($entry["total_cents"]) . " coins (" . $this->formatConfiguredPrice($entry["unit_price"]) . " each).");
 		}
-		$player->sendMessage("§aTổng cộng: §e" . SellPolicy::formatCents($totalCents) . " Xu§a.");
+		$player->sendMessage("§aTotal: " . SellPolicy::formatCents($totalCents) . " coins.");
 	}
 
 	private function message(string $key, string $fallback) : string{
